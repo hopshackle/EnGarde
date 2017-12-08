@@ -3,6 +3,7 @@ package hopshackle.engarde;
 import hopshackle.engarde.actions.EnGardeActions;
 import hopshackle.engarde.military.Rank;
 import hopshackle.engarde.military.Regiment;
+import hopshackle.engarde.social.Club;
 import hopshackle.simulation.*;
 
 import java.util.*;
@@ -29,11 +30,15 @@ public class Paris extends World {
         setDatabaseAccessUtility(dbu);
         setCalendar(new FastCalendar(1600 * 480));
 
+        Regiment.instantiate(this);
+        Club.instantiate(this);
+
         populateStartingRegimentalOfficers();
-        ap.start();
 
         new PopulationSpawner(this, 40, 5, minPopulationSize);
         new MonthlyMaintenance(this);
+
+        ap.start();
     }
 
     private void populateStartingRegimentalOfficers() {
@@ -77,7 +82,7 @@ public class Paris extends World {
     }
 
     public String getCurrentDate() {
-        long time = getCurrentTime();
+        long time = getCurrentTime() - 5;
         int year = (int) (time / 480);
         int m = (int) (time % 480 / 40) + 1;
         String month = "";

@@ -16,6 +16,7 @@ public class GentlemanDAO implements DAO<Gentleman>, DAODuplicateUpdate {
                 " income    INT             NOT NULL," +
                 " rank      INT             NOT NULL," +
                 " regiment  INT             NOT NULL," +
+                " club      INT             NOT NULL," +
                 " birthYear INT             NOT NULL," +
                 " deathYear INT             NOT NULL" +
                 ");";
@@ -23,13 +24,13 @@ public class GentlemanDAO implements DAO<Gentleman>, DAODuplicateUpdate {
 
     public String getTableUpdateSQL(String tableSuffix) {
         return "INSERT INTO Gentlemen_" + tableSuffix +
-                " (id, name, SL, gold, income, rank, regiment, birthYear, deathYear" +
+                " (id, name, SL, gold, income, rank, regiment, club, birthYear, deathYear" +
                 ") VALUES";
     }
 
     public String getValues(Gentleman agent) {
 
-        return String.format(" (%d, '%s', %d, %d, %d, %d, %d, %d, %d)",
+        return String.format(" (%d, '%s', %d, %d, %d, %d, %d, %d, %d, %d)",
                 agent.getUniqueID(),
                 agent.getName(),
                 agent.getSocialLevel(),
@@ -37,6 +38,7 @@ public class GentlemanDAO implements DAO<Gentleman>, DAODuplicateUpdate {
                 agent.getIncome(),
                 agent.getRank().asInteger(),
                 agent.getRegiment() == null ? 0 : agent.getRegiment().getID(),
+                agent.getClub() == null ? 0 : agent.getClub().getID(),
                 agent.getBirthYear(),
                 agent.getDeathYear()
         );
@@ -45,7 +47,8 @@ public class GentlemanDAO implements DAO<Gentleman>, DAODuplicateUpdate {
     public String getOnDuplicateKey() {
         return String.format(" ON DUPLICATE KEY UPDATE " +
                         "name = VALUES(id), name = VALUES(name), SL = VALUES(SL), gold = VALUES(gold), income = VALUES(income), " +
-                        "rank = VALUES(rank), regiment = VALUES(regiment), birthYear = VALUES(birthYear), deathYear = VALUES(deathYear)"
+                        "rank = VALUES(rank), regiment = VALUES(regiment), club = VALUES(club), birthYear = VALUES(birthYear), " +
+                        "deathYear = VALUES(deathYear)"
         );
     }
 

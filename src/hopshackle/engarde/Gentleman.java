@@ -2,6 +2,7 @@ package hopshackle.engarde;
 
 import hopshackle.engarde.dao.GentlemanDAO;
 import hopshackle.engarde.military.*;
+import hopshackle.engarde.social.*;
 import hopshackle.simulation.*;
 
 import java.io.*;
@@ -33,6 +34,7 @@ public class Gentleman extends Agent implements Persistent {
     private String forename, surname;
     private List<Organisation> organisations = new ArrayList<>();
     private boolean justArrived = true;
+    private int weeksOfService = 0;
 
     public Gentleman(World world, int socialLevel, int gold, int income) {
         super(world);
@@ -84,11 +86,29 @@ public class Gentleman extends Agent implements Persistent {
         return retValue;
     }
 
+    public Club getClub() {
+        Club retValue = null;
+        for (Organisation org : organisations) {
+            if (org instanceof Club) {
+                if (retValue != null) throw new AssertionError("Should only be member of one club");
+                retValue = (Club) org;
+            }
+        }
+        return retValue;
+    }
+
     public void setRegiment(Regiment newReg) {
         if (getRegiment() != null) {
             organisations.remove(getRegiment());
         }
         organisations.add(newReg);
+    }
+
+    public void setClub(Club newClub) {
+        if (getClub() != null) {
+            organisations.remove(getClub());
+        }
+        organisations.add(newClub);
     }
 
     public int getBirthYear() {
@@ -101,7 +121,13 @@ public class Gentleman extends Agent implements Persistent {
 
     public void maintenance() {
         logger.flush();
-        agentWriter.write(this, getWorld().toString());
+    }
+
+    public void doWeekOfService() {
+        weeksOfService++;
+    }
+    public int getWeeksOfService() {
+        return weeksOfService;
     }
 
     public void monthlyMaintenance() {
@@ -120,8 +146,17 @@ public class Gentleman extends Agent implements Persistent {
             if (rank.asInteger() > 3)
                 monthlyExpenditure += 4; // +2 Horses
         }
+
+        Club club = getClub();
+        if (club != null)
+            monthlyExpenditure += club.getMonthlyDues();
+
         log("Monthly net income is " + (monthlyIncome - monthlyExpenditure));
         addGold(monthlyIncome);
         addGold(-monthlyExpenditure);
+
+        weeksOfService = 0;
+
+        agentWriter.write(this, getWorld().toString());
     }
 }

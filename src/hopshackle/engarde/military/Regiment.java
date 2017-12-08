@@ -9,10 +9,10 @@ public class Regiment extends Organisation<Gentleman> {
 
     static List<Regiment> regiments = new ArrayList<Regiment>();
 
-    static {
+    public static void instantiate(World world) {
         for (RegimentID rid : RegimentID.values()) {
             if (rid != RegimentID.NONE)
-                regiments.add(new Regiment(rid));
+                regiments.add(new Regiment(rid, world));
         }
     }
 
@@ -34,8 +34,8 @@ public class Regiment extends Organisation<Gentleman> {
 
     private Gentleman[] battalionCommanders = new Gentleman[3];
 
-    private Regiment(RegimentID regimentID) {
-        super(regimentID.toString(), null, new ArrayList<>());
+    private Regiment(RegimentID regimentID, World world) {
+        super(regimentID.toString(), new Location(world), new ArrayList<>());
         rid = regimentID;
     }
 

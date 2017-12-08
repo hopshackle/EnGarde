@@ -1,5 +1,7 @@
 package hopshackle.engarde;
 
+import hopshackle.engarde.actions.*;
+import hopshackle.engarde.military.Rank;
 import hopshackle.simulation.*;
 
 import java.util.*;
@@ -27,7 +29,27 @@ public class EnGardeDecider extends BaseDecider<Gentleman> {
 
     @Override
     public double valueOption(ActionEnum<Gentleman> option, Gentleman decidingAgent) {
-        return 0;
+        switch ((EnGardeActions) option) {
+            case REGIMENTAL_SERVICE:
+                int currentWeek = (int) (decidingAgent.getWorld().getCurrentTime() % 40) / 10 + 1;
+                if (currentWeek == 1) return 0.0;
+                    // bit of a fudge this. In Week 1 it is never going to be mandatory, but the
+                    // record of the previous month is still present (only cleared after this decision is taken)
+                int currentService = decidingAgent.getWeeksOfService();
+                if (decidingAgent.getRank() == Rank.PRIVATE && currentService < 2) {
+                    if (2 - currentWeek + currentService < 0)
+                        return 2.0;
+                    return 0.0;
+                }
+                if (decidingAgent.getRank() == Rank.SUBALTERN && currentService < 1) {
+                    if (3 - currentWeek + currentService < 0)
+                        return 2.0;
+                    return 0.0;
+                }
+                return -1;
+            default:
+                return 0;
+        }
     }
 
     @Override
@@ -45,5 +67,6 @@ public class EnGardeDecider extends BaseDecider<Gentleman> {
     }
 
     @Override
-    public void learnFrom(ExperienceRecord<Gentleman> exp, double maxResult) {}
+    public void learnFrom(ExperienceRecord<Gentleman> exp, double maxResult) {
+    }
 }

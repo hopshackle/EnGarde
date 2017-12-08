@@ -13,13 +13,9 @@ public class JoinRegiment extends Action<Gentleman> {
         super(EnGardeActions.JOIN_REGIMENT, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), startOffset, 10, true);
     }
 
-
     protected void doStuff() {
         /* We apply to a random regiment that is better than the current one
          *  TODO: Make this more intelligent and/or apply personality traits for risk-taking and chutzpah */
-
-        actor.getLock();
-
         Regiment current = actor.getRegiment();
         int cash = (int) actor.getGold();
         boolean considerCavalry = (cash < 200) ? false : true;
@@ -42,7 +38,6 @@ public class JoinRegiment extends Action<Gentleman> {
             boolean success = target.applyToRegiment(actor);
             if (success) purchaseRank();
         }
-        actor.releaseLock();
         return;
     }
 

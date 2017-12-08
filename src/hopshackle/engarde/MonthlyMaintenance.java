@@ -20,6 +20,6 @@ public class MonthlyMaintenance {
             }
 
         };
-        world.setScheduledTask(newTask, 45, 40);
+        world.setScheduledTask(newTask, 43, 40);
     }
 }
