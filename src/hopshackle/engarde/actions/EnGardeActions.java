@@ -5,7 +5,8 @@ import hopshackle.engarde.*;
 
 public enum EnGardeActions implements ActionEnum<Gentleman> {
 
-    JOIN_REGIMENT;
+    JOIN_REGIMENT
+    ;
 
     @Override
     public String getChromosomeDesc() {
@@ -16,14 +17,17 @@ public enum EnGardeActions implements ActionEnum<Gentleman> {
     public Action<Gentleman> getAction(Gentleman gentleman) {
         switch (this) {
             case JOIN_REGIMENT:
-                return new JoinRegiment(gentleman, 1);
+                return new JoinRegiment(gentleman, 0);
         }
         return null;
     }
 
     @Override
     public boolean isChooseable(Gentleman gentleman) {
-        return true;
+        switch (this) {
+            default:
+                return true;
+        }
     }
 
     @Override

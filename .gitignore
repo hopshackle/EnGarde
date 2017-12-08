@@ -1,0 +1,10 @@
+.classpath
+.project
+*.jar
+*.iml
+.project
+.classpath
+/.metadata/
+/.settings/
+/.idea/
+/hopshackle/

@@ -10,13 +10,15 @@ import java.util.*;
 public class JoinRegiment extends Action<Gentleman> {
 
     public JoinRegiment(Gentleman a, long startOffset) {
-        super(EnGardeActions.JOIN_REGIMENT, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), startOffset, 1, true);
+        super(EnGardeActions.JOIN_REGIMENT, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), startOffset, 10, true);
     }
 
 
     protected void doStuff() {
         /* We apply to a random regiment that is better than the current one
          *  TODO: Make this more intelligent and/or apply personality traits for risk-taking and chutzpah */
+
+        actor.getLock();
 
         Regiment current = actor.getRegiment();
         int cash = (int) actor.getGold();
@@ -34,21 +36,32 @@ public class JoinRegiment extends Action<Gentleman> {
                 possibleRegiments.add(r);
             }
         }
-        if (possibleRegiments.isEmpty()) return;
-        target = possibleRegiments.get(Dice.roll(1, possibleRegiments.size()) - 1);
+        if (!possibleRegiments.isEmpty()) {
+            target = possibleRegiments.get(Dice.roll(1, possibleRegiments.size()) - 1);
 
-        boolean success = target.applyToRegiment(actor);
-        if (success) purchaseRank();
+            boolean success = target.applyToRegiment(actor);
+            if (success) purchaseRank();
+        }
+        actor.releaseLock();
+        return;
     }
 
 
     private void purchaseRank() {
         int cash = (int) actor.getGold();
         Regiment reg = actor.getRegiment();
-        if (actor.getSocialLevel() >= reg.getMinSL(Rank.SUBALTERN) && cash > reg.getCommissionCost(Rank.SUBALTERN)) {
+        if (actor.getRank() == Rank.PRIVATE && actor.getSocialLevel() >= reg.getMinSL(Rank.SUBALTERN) && cash > reg.getCommissionCost(Rank.SUBALTERN)) {
             actor.log("Buys Subalterncy");
             actor.addGold(-reg.getCommissionCost(Rank.SUBALTERN));
             actor.setRank(Rank.SUBALTERN);
+        }
+        cash = (int) actor.getGold();
+        if (actor.getRank() == Rank.SUBALTERN && reg.hasVacancy(Rank.CAPTAIN) &&
+                actor.getSocialLevel() >= reg.getMinSL(Rank.SUBALTERN) && cash > reg.getCommissionCost(Rank.CAPTAIN)) {
+            actor.log("Buys Captaincy");
+            actor.addGold(-reg.getCommissionCost(Rank.CAPTAIN));
+            actor.setRank(Rank.CAPTAIN);
+            reg.promote(actor);
         }
     }
 }

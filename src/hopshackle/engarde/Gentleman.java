@@ -32,6 +32,7 @@ public class Gentleman extends Agent implements Persistent {
     private Rank rank;
     private String forename, surname;
     private List<Organisation> organisations = new ArrayList<>();
+    private boolean justArrived = true;
 
     public Gentleman(World world, int socialLevel, int gold, int income) {
         super(world);
@@ -91,15 +92,36 @@ public class Gentleman extends Agent implements Persistent {
     }
 
     public int getBirthYear() {
-        return (int) (super.getBirth() / 48);
+        return (int) (super.getBirth() / 480);
     }
     public int getDeathYear() {
         if (!isDead()) return 0;
-        return (int) (death / 48);
+        return (int) (death / 480);
     }
 
     public void maintenance() {
         logger.flush();
         agentWriter.write(this, getWorld().toString());
+    }
+
+    public void monthlyMaintenance() {
+        if (justArrived) {
+            justArrived = false;
+            return;
+        }
+        Regiment reg = getRegiment();
+        Rank rank = getRank();
+        int monthlyIncome = getIncome();
+        monthlyIncome += (reg != null) ? reg.getMonthlyPay(rank) : 0;
+        int monthlyExpenditure = getSocialLevel() * 2;
+        if (rank != null) {
+            if (rank == Rank.CAPTAIN || (reg != null && reg.isCavalry()))
+                monthlyExpenditure += 5; // Horse + Groom
+            if (rank.asInteger() > 3)
+                monthlyExpenditure += 4; // +2 Horses
+        }
+        log("Monthly net income is " + (monthlyIncome - monthlyExpenditure));
+        addGold(monthlyIncome);
+        addGold(-monthlyExpenditure);
     }
 }
