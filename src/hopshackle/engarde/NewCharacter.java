@@ -9,7 +9,7 @@ public class NewCharacter {
     static int[] inheritance = {0, 0, 100, 750, 1500, 4000, 100, 100, 1500, 1500, 4000, 5000, 100, 100, 1500, 4000, 5000, 5000};
     static int[] socialLevel = {2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 0, 0, 0, 0, 0, 0};
 
-    public static Gentleman getNewbie(World w) {
+    public static Gentleman getNewbie(Paris w) {
 
         int baseRoll = Dice.roll(1, 18);
         int sibling = Dice.roll(1, 6);

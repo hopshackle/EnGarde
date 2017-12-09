@@ -9,7 +9,7 @@ public class PopulationSpawner {
 
     protected static Logger logger = Logger.getLogger("hopshackle.simulation");
 
-    public PopulationSpawner(World world, long freq, int maxIncrement, int minimumWorldPopulation) {
+    public PopulationSpawner(Paris world, long freq, int maxIncrement, int minimumWorldPopulation) {
         TimerTask newTask = new TimerTask() {
             public void run() {
                 List<Agent> allAgents = world.getAgents();

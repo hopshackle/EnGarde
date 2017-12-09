@@ -5,6 +5,7 @@ import hopshackle.engarde.military.*;
 
 public enum ClubID {
 
+    BAWDYHOUSE          (0, "Bawdyhouse", "Bawdy", 0, 0, 0, 0, 0),
     RED_PHILLIPPES      (1, "Red Phillippes", "RP", 3, 5, 2, 50, 150),
     FROG_AND_PEACH      (2, "The Frog & Peach", "F&P", 5, 10, 3, 100, 150),
     BLUE_GABLES         (3, "The Blue Gables", "BG", 7, 15, 4, 150, 200),
@@ -30,6 +31,8 @@ public enum ClubID {
         if (g.getSocialLevel() < minimumSL) return false;
         if (g.getGold() < monthlyDues) return false;
         switch (this) {
+            case BAWDYHOUSE:
+                return false;       // is the default option
             case HORSE_GUARDS:
                 Regiment reg = g.getRegiment();
                 if (reg != null && (reg.getID() == 4 || reg.getID() == 5) && g.getRank() != Rank.PRIVATE)

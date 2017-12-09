@@ -8,8 +8,8 @@ import java.util.*;
 
 public class RegimentalService extends Action<Gentleman> {
 
-    public RegimentalService(Gentleman a, long startOffset) {
-        super(EnGardeActions.REGIMENTAL_SERVICE, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), startOffset, 10, true);
+    public RegimentalService(Gentleman a) {
+        super(EnGardeActions.REGIMENTAL_SERVICE, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), 0, 10, true);
     }
 
     public void initialisation() {

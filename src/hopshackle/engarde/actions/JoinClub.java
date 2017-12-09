@@ -8,8 +8,8 @@ import java.util.*;
 
 public class JoinClub extends Action<Gentleman> {
 
-    public JoinClub(Gentleman a, long startOffset) {
-        super(EnGardeActions.JOIN_CLUB, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), startOffset, 10, true);
+    public JoinClub(Gentleman a) {
+        super(EnGardeActions.JOIN_CLUB, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), 0, 10, true);
     }
 
     public void doStuff() {
@@ -17,7 +17,7 @@ public class JoinClub extends Action<Gentleman> {
         Club currentClub = actor.getClub();
         for (Club c : Club.allClubs()) {
             if (c.isEligible(actor) && c != currentClub) {
-                if (currentClub == null)
+                if (currentClub.getID() == 0)
                     bestClub = c;
                 else if (bestClub != null && bestClub.getMonthlyStatus() > currentClub.getMonthlyStatus())
                     bestClub = c;

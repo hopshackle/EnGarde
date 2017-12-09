@@ -9,8 +9,8 @@ import java.util.*;
 
 public class JoinRegiment extends Action<Gentleman> {
 
-    public JoinRegiment(Gentleman a, long startOffset) {
-        super(EnGardeActions.JOIN_REGIMENT, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), startOffset, 10, true);
+    public JoinRegiment(Gentleman a) {
+        super(EnGardeActions.JOIN_REGIMENT, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), 0, 10, true);
     }
 
     protected void doStuff() {

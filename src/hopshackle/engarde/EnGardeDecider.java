@@ -30,6 +30,14 @@ public class EnGardeDecider extends BaseDecider<Gentleman> {
     @Override
     public double valueOption(ActionEnum<Gentleman> option, Gentleman decidingAgent) {
         switch ((EnGardeActions) option) {
+            case JOIN_CLUB:
+                if (decidingAgent.getClub().getID() == 0 && decidingAgent.getSocialLevel() >= 3)
+                    return 10.0;
+                break;
+            case JOIN_REGIMENT:
+                if (decidingAgent.getRegiment() == null)
+                    return 10.0;
+                break;
             case REGIMENTAL_SERVICE:
                 int currentWeek = (int) (decidingAgent.getWorld().getCurrentTime() % 40) / 10 + 1;
                 if (currentWeek == 1) return 0.0;
@@ -50,6 +58,7 @@ public class EnGardeDecider extends BaseDecider<Gentleman> {
             default:
                 return 0;
         }
+        return 0;
     }
 
     @Override

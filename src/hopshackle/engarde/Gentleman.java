@@ -28,7 +28,7 @@ public class Gentleman extends Agent implements Persistent {
     protected static Name surnamer = new Name(new File(baseDir + File.separator + "FrenchSurnames.txt"));
     private static DatabaseWriter<Gentleman> agentWriter = new DatabaseWriter<>(new GentlemanDAO());
 
-    private int socialLevel;
+    private int socialLevel, statusPoints;
     private int income;
     private Rank rank;
     private String forename, surname;
@@ -36,7 +36,7 @@ public class Gentleman extends Agent implements Persistent {
     private boolean justArrived = true;
     private int weeksOfService = 0;
 
-    public Gentleman(World world, int socialLevel, int gold, int income) {
+    public Gentleman(Paris world, int socialLevel, int gold, int income) {
         super(world);
         birth = world.getCurrentTime();
         this.forename = fornamer.getName();
@@ -46,6 +46,8 @@ public class Gentleman extends Agent implements Persistent {
         this.income = income;
         setRank(Rank.NONE);
         this.setDebugLocal(true);
+        this.setDebugDecide(false);
+        setClub(Club.getBawdyHouse());
         log(getName() + " arrives in Paris");
     }
 
@@ -129,6 +131,9 @@ public class Gentleman extends Agent implements Persistent {
     public int getWeeksOfService() {
         return weeksOfService;
     }
+    public void addStatus(int statusGain) {
+        statusPoints += statusGain;
+    }
 
     public void monthlyMaintenance() {
         if (justArrived) {
@@ -140,22 +145,37 @@ public class Gentleman extends Agent implements Persistent {
         int monthlyIncome = getIncome();
         monthlyIncome += (reg != null) ? reg.getMonthlyPay(rank) : 0;
         int monthlyExpenditure = getSocialLevel() * 2;
-        if (rank != null) {
+        if (rank.asInteger() > 0) {
             if (rank == Rank.CAPTAIN || (reg != null && reg.isCavalry()))
                 monthlyExpenditure += 5; // Horse + Groom
             if (rank.asInteger() > 3)
                 monthlyExpenditure += 4; // +2 Horses
+            if (reg == null)
+                throw new AssertionError("Has rank of " + rank + " but not in regiment");
+            addStatus(reg.getMonthlyStatus(rank));
         }
 
         Club club = getClub();
-        if (club != null)
+        if (club != null) {
             monthlyExpenditure += club.getMonthlyDues();
+            addStatus(club.getMonthlyStatus());
+        }
 
         log("Monthly net income is " + (monthlyIncome - monthlyExpenditure));
         addGold(monthlyIncome);
         addGold(-monthlyExpenditure);
 
         weeksOfService = 0;
+
+        if (statusPoints >= 3 * socialLevel) {
+            socialLevel++;
+            log("Increases social level to " + socialLevel + " (SP: " + statusPoints + ")");
+        }
+        if (statusPoints < socialLevel) {
+            socialLevel--;
+            log("Decreases social level to " + socialLevel+ " (SP: " + statusPoints + ")");
+        }
+        statusPoints = 0;
 
         agentWriter.write(this, getWorld().toString());
     }

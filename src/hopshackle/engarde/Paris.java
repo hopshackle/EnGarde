@@ -37,7 +37,8 @@ public class Paris extends World {
 
         new PopulationSpawner(this, 40, 5, minPopulationSize);
         new MonthlyMaintenance(this);
-
+        new EndWorld(this, 2 * 480 + 4);     // immediately after the monthly maintenance runs
+                                                        // and before the date changes
         ap.start();
     }
 

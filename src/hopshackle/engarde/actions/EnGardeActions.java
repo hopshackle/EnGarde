@@ -8,7 +8,9 @@ public enum EnGardeActions implements ActionEnum<Gentleman> {
 
     JOIN_REGIMENT,
     JOIN_CLUB,
-    REGIMENTAL_SERVICE;
+    REGIMENTAL_SERVICE,
+    CAROUSE,
+    HOST_PARTY;
 
     @Override
     public String getChromosomeDesc() {
@@ -19,11 +21,15 @@ public enum EnGardeActions implements ActionEnum<Gentleman> {
     public Action<Gentleman> getAction(Gentleman gentleman) {
         switch (this) {
             case JOIN_REGIMENT:
-                return new JoinRegiment(gentleman, 0);
+                return new JoinRegiment(gentleman);
             case JOIN_CLUB:
-                return new JoinClub(gentleman, 0);
+                return new JoinClub(gentleman);
             case REGIMENTAL_SERVICE:
-                return new RegimentalService(gentleman, 0);
+                return new RegimentalService(gentleman);
+            case CAROUSE:
+                return new Carouse(gentleman);
+            case HOST_PARTY:
+                return new HostParty(gentleman);
         }
         return null;
     }
@@ -39,6 +45,10 @@ public enum EnGardeActions implements ActionEnum<Gentleman> {
                     return true;
                 }
                 return false;
+            case HOST_PARTY:
+                if (gentleman.getClub().getID() == 0)
+                    return false;       // not a member of a club
+                return true;
             default:
                 return true;
         }
