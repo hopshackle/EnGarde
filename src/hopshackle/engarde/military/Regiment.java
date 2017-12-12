@@ -35,13 +35,15 @@ public class Regiment extends Organisation<Gentleman> {
     private Gentleman[] battalionCommanders = new Gentleman[3];
 
     private Regiment(RegimentID regimentID, World world) {
-        super(regimentID.toString(), new Location(world), new ArrayList<>());
+        super(regimentID.toString(), world, new ArrayList<>());
         rid = regimentID;
     }
 
     public int getID() {
         return rid.getID();
     }
+
+    public String abbrev() { return rid.abbrev();}
 
     public int getMinSL(Rank r) {
         return rid.minSL(r);
@@ -71,28 +73,30 @@ public class Regiment extends Organisation<Gentleman> {
             throw new AssertionError(officer + " is not a member of " + this + " to be promoted");
         switch (officer.getRank()) {
             case PRIVATE:
+                officer.log("Promoted to Subaltern");
                 officer.setRank(Rank.SUBALTERN);
                 break;
             case SUBALTERN:
                 if (hasVacancy(Rank.CAPTAIN)) {
+                    officer.log("Promoted to Captain");
                     officer.setRank(Rank.CAPTAIN);
                     setJuniorCaptain(officer);
-                    officer.log("Promoted to Captain");
                 } else {
-                    // TODO: gain additional mention instead
+                    officer.mentionedInDispatches();
                 }
                 break;
             case CAPTAIN:
                 if (hasVacancy(Rank.MAJOR)) {
+                    officer.log("Promoted to Major");
                     officer.setRank(Rank.MAJOR);
                     setJuniorMajor(officer);
-                    officer.log("Promoted to Major");
                 } else {
-                    // TODO: gain additional mention instead
+                    officer.mentionedInDispatches();
                 }
                 break;
             case MAJOR:
                 if (hasVacancy(Rank.LT_COLONEL)) {
+                    officer.log("Promoted to Lt-Colonel");
                     officer.setRank(Rank.LT_COLONEL);
                     for (int i = 0; i < 2; i++)
                         if (major[i] == officer) {
@@ -101,30 +105,37 @@ public class Regiment extends Organisation<Gentleman> {
                         }
                     ltColonel = officer;
                     ltColonelID = officer.getUniqueID();
-                    officer.log("Promoted to Lt-Colonel");
                 } else {
-                    // TODO: gain additional mention instead
+                    officer.mentionedInDispatches();
                 }
                 break;
             case LT_COLONEL:
                 if (hasVacancy(Rank.COLONEL)) {
+                    officer.log("Promoted to Colonel");
                     officer.setRank(Rank.COLONEL);
                     colonel = officer;
                     colonelID = officer.getUniqueID();
                     ltColonel = null;
                     ltColonelID = 0;
-                    officer.log("Promoted to Colonel");
                 } else {
-                    // TODO: gain additional mention instead
+                    officer.mentionedInDispatches();
                 }
                 break;
             case COLONEL:
+                officer.log("Promoted to Brigadier-General");
                 officer.setRank(Rank.BRIG_GENERAL);
                 colonel = null;
                 colonelID = 0;
                 break;
+            case BRIG_GENERAL:
+                officer.log("Promoted to Lt-General");
+                officer.setRank(Rank.LT_GENERAL);
+                break;
+            case LT_GENERAL:
+                officer.log("Promoted to General");
+                officer.setRank(Rank.GENERAL);
+                break;
             default:
-                throw new AssertionError("Cannot be promoted from " + officer.getRank());
         }
         tidyUpOfficers();
     }
@@ -171,6 +182,94 @@ public class Regiment extends Organisation<Gentleman> {
                 captain[i] = null;
             }
         }
+    }
+
+    public void endOfMonthCommissions() {
+        if (colonelID == 0 && ltColonelID != 0) {
+            if (ltColonel.getSocialLevel() >= getMinSL(Rank.COLONEL) && ltColonel.getGold() >= getCommissionCost(Rank.COLONEL)) {
+                ltColonel.log("Buys Colonelcy");
+                ltColonel.addGold(-getCommissionCost(Rank.COLONEL));
+                promote(ltColonel);
+            }
+        }
+        for (int i = 0; i < 2; i++) {
+            if (ltColonelID == 0 && majorID[i] != 0) {
+                if (major[i].getSocialLevel() >= getMinSL(Rank.LT_COLONEL) && major[i].getGold() >= getCommissionCost(Rank.LT_COLONEL)) {
+                    major[i].log("Buys Lt-Colonelcy");
+                    major[i].addGold(-getCommissionCost(Rank.LT_COLONEL));
+                    promote(major[i]);
+                }
+            }
+        }
+        for (int i = 0; i < 6; i++) {
+            if (majorID[1] == 0 && captainID[i] != 0) {
+                if (captain[i].getSocialLevel() >= getMinSL(Rank.MAJOR) && captain[i].getGold() >= getCommissionCost(Rank.MAJOR)) {
+                    captain[i].log("Buys Majority");
+                    captain[i].addGold(-getCommissionCost(Rank.MAJOR));
+                    promote(captain[i]);
+                }
+            }
+        }
+        List<Gentleman> allSubalterns = new ArrayList<>();
+        List<Gentleman> allPrivates = new ArrayList<>();
+        for (Gentleman g : getCurrentMembership()) {
+            if (g.getRank() == Rank.SUBALTERN)
+                allSubalterns.add(g);
+            if (g.getRank() == Rank.PRIVATE)
+                allPrivates.add(g);
+        }
+        Collections.sort(allSubalterns, new Comparator<Gentleman>() {
+            @Override
+            public int compare(Gentleman o1, Gentleman o2) {
+                return -(o1.getSocialLevel() + o1.getMentions() / 2 + o1.getAge() / 5)  +
+                        (o2.getSocialLevel() + o2.getMentions() / 2 + o2.getAge() / 5);
+            }
+        });
+
+        for (Gentleman subaltern : allSubalterns) {
+            if (captainID[5] == 0) {
+                if (subaltern.getSocialLevel() >= getMinSL(Rank.CAPTAIN) && subaltern.getGold() >= getCommissionCost(Rank.CAPTAIN)) {
+                    subaltern.log("Buys Captaincy");
+                    subaltern.addGold(-getCommissionCost(Rank.CAPTAIN));
+                    promote(subaltern);
+                }
+            } else {
+                break;
+            }
+        }
+        for (Gentleman pte : allPrivates) {
+            if (pte.getSocialLevel() >= getMinSL(Rank.SUBALTERN) && pte.getGold() >= getCommissionCost(Rank.SUBALTERN)) {
+                pte.log("Buys Subalterncy");
+                pte.addGold(-getCommissionCost(Rank.SUBALTERN));
+                promote(pte);
+            }
+        }
+    }
+
+    @Override
+    public void memberLeaves(Gentleman g) {
+        super.memberLeaves(g);
+        if (colonel == g) {
+            colonel = null;
+            colonelID = 0;
+        }
+        if (ltColonel == g) {
+            ltColonel = null;
+            ltColonelID = 0;
+        }
+        for (int i = 0; i < 2; i++) {
+            if (major[i] == g) {
+                major[i] = null;
+                majorID[i] = 0;
+            }
+        }
+        for (int i =0; i < 6; i++) {
+            if (captain[i] == g) {
+                captain[i] = null;
+                captainID[i] = 0;
+            }
+        }
+        tidyUpOfficers();
     }
 
     private void tidyUpOfficers() {
@@ -243,5 +342,9 @@ public class Regiment extends Organisation<Gentleman> {
         applicant.setRank(Rank.PRIVATE);
         applicant.setRegiment(this);
         if (isCavalry()) applicant.addGold(-100);
+    }
+
+    public int relationshipWith(Regiment other) {
+        return rid.relationShipWith(other.rid);
     }
 }

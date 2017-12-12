@@ -10,7 +10,11 @@ import java.util.*;
 public class JoinRegiment extends Action<Gentleman> {
 
     public JoinRegiment(Gentleman a) {
-        super(EnGardeActions.JOIN_REGIMENT, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), 0, 10, true);
+        super(EnGardeActions.JOIN_REGIMENT, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), 2, 8, true);
+    }
+
+    public void initialisation() {
+        actor.setLocation(actor.getWorld());
     }
 
     protected void doStuff() {
@@ -55,7 +59,6 @@ public class JoinRegiment extends Action<Gentleman> {
                 actor.getSocialLevel() >= reg.getMinSL(Rank.SUBALTERN) && cash > reg.getCommissionCost(Rank.CAPTAIN)) {
             actor.log("Buys Captaincy");
             actor.addGold(-reg.getCommissionCost(Rank.CAPTAIN));
-            actor.setRank(Rank.CAPTAIN);
             reg.promote(actor);
         }
     }

@@ -1,9 +1,9 @@
 package hopshackle.engarde;
 
 import hopshackle.engarde.actions.EnGardeActions;
-import hopshackle.engarde.military.Rank;
-import hopshackle.engarde.military.Regiment;
-import hopshackle.engarde.social.Club;
+import hopshackle.engarde.military.*;
+import hopshackle.engarde.social.*;
+import hopshackle.engarde.actions.ActionPolicy;
 import hopshackle.simulation.*;
 
 import java.util.*;
@@ -14,6 +14,10 @@ public class Paris extends World {
      * Each month we have a new batch of people arrive in Paris
      * */
     private static List<ActionEnum<Gentleman>> actionSet = HopshackleUtilities.listFromInstances(EnGardeActions.values());
+    public static final Policy<Action<Gentleman>> actionPolicy = new ActionPolicy();
+
+    private CampaignDecisions campaignDecisions;
+
 
     public static void main(String[] args) {
         ActionProcessor ap = new ActionProcessor("EnGarde", false);
@@ -28,7 +32,7 @@ public class Paris extends World {
         Thread t = new Thread(dbu);
         t.start();
         setDatabaseAccessUtility(dbu);
-        setCalendar(new FastCalendar(1600 * 480));
+        setCalendar(new FastCalendar(1600 * 480 - 2));
 
         Regiment.instantiate(this);
         Club.instantiate(this);
@@ -37,8 +41,11 @@ public class Paris extends World {
 
         new PopulationSpawner(this, 40, 5, minPopulationSize);
         new MonthlyMaintenance(this);
-        new EndWorld(this, 2 * 480 + 4);     // immediately after the monthly maintenance runs
-                                                        // and before the date changes
+        new EndWorld(this, 2 * 480 + 4);
+
+        new WeeklySocialInteractions(this);
+        campaignDecisions = new CampaignDecisions(this);
+
         ap.start();
     }
 
@@ -74,18 +81,19 @@ public class Paris extends World {
             }
 
             for (Gentleman officer : officers) {
-                this.addAgent(officer);
+                officer.setLocation(this);
                 officer.setDecider(new EnGardeDecider());
                 officer.setAge(480 * (officer.getRank().asInteger() * 5 + 10));
+                officer.setPolicy(actionPolicy);
                 officer.decide();
             }
         }
     }
 
-    public String getCurrentDate() {
-        long time = getCurrentTime() - 5;
+    public String getDate(long time) {
         int year = (int) (time / 480);
         int m = (int) (time % 480 / 40) + 1;
+        int week = (int) (time % 40 / 10) + 1;
         String month = "";
         switch (m) {
             case 1:
@@ -127,7 +135,11 @@ public class Paris extends World {
             default:
                 month = "UNK";
         }
-        return month + " " + year;
+        return week + " " + month + " " + year;
+    }
+
+    public String getCurrentDate() {
+        return getDate(getCurrentTime());
     }
 
 }

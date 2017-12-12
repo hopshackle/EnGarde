@@ -7,7 +7,7 @@ import hopshackle.engarde.social.*;
 public class Carouse extends Action<Gentleman> {
 
     public Carouse(Gentleman chap) {
-        super(EnGardeActions.CAROUSE, chap, 0, 10, true);
+        super(EnGardeActions.CAROUSE, chap, 2, 8, true);
     }
 
     @Override

@@ -12,7 +12,7 @@ public class PopulationSpawner {
     public PopulationSpawner(Paris world, long freq, int maxIncrement, int minimumWorldPopulation) {
         TimerTask newTask = new TimerTask() {
             public void run() {
-                List<Agent> allAgents = world.getAgents();
+                List<Agent> allAgents = world.getAgentsIncludingChildLocations();
 
                 int agentsToAdd = maxIncrement;
                 if (allAgents.size() < minimumWorldPopulation) {
@@ -28,7 +28,8 @@ public class PopulationSpawner {
                         Gentleman newbie = NewCharacter.getNewbie(world);
                         newbie.setAge(16 * 480);
                         newbie.setDecider(new EnGardeDecider());
-                        world.addAgent(newbie);
+                        newbie.setPolicy(world.actionPolicy);
+                        newbie.setLocation(world);
                         newbie.decide();
                     }
                 }

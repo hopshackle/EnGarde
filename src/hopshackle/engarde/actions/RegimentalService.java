@@ -9,7 +9,7 @@ import java.util.*;
 public class RegimentalService extends Action<Gentleman> {
 
     public RegimentalService(Gentleman a) {
-        super(EnGardeActions.REGIMENTAL_SERVICE, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), 0, 10, true);
+        super(EnGardeActions.REGIMENTAL_SERVICE, HopshackleUtilities.listFromInstance(a), new ArrayList<Gentleman>(), 2, 8, true);
     }
 
     public void initialisation() {

@@ -28,11 +28,12 @@ public enum ClubID {
     }
 
     public boolean isEligible(Gentleman g) {
+        if (this == BAWDYHOUSE) return true;
         if (g.getSocialLevel() < minimumSL) return false;
         if (g.getGold() < monthlyDues) return false;
         switch (this) {
             case BAWDYHOUSE:
-                return false;       // is the default option
+                return true;       // is the default option
             case HORSE_GUARDS:
                 Regiment reg = g.getRegiment();
                 if (reg != null && (reg.getID() == 4 || reg.getID() == 5) && g.getRank() != Rank.PRIVATE)
