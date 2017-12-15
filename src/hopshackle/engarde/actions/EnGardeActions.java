@@ -63,6 +63,9 @@ public enum EnGardeActions implements ActionEnum<Gentleman> {
                 guests = HopshackleUtilities.convertSetToList(guestSet);
                 return new HostParty(HOST_EXCLUSIVE_PARTY, gentleman, HopshackleUtilities.convertList(guests));
             case FIGHT_ON_FRONTIER:
+                if (gentleman.getRegiment() != null && gentleman.getRegiment().getCommander() == gentleman) {
+                    return new MilitaryCampaign(gentleman.getRegiment());
+                }
                 return new FrontierService(gentleman);
         }
         return null;
@@ -72,6 +75,10 @@ public enum EnGardeActions implements ActionEnum<Gentleman> {
     public boolean isChooseable(Gentleman gentleman) {
         int currentWeek = (int) (gentleman.getWorld().getCurrentTime() % 40) / 10 + 1;
         switch (this) {
+            case JOIN_REGIMENT:
+                if (gentleman.getRank().asInteger() > 5)
+                    return false;
+                return true;
             case REGIMENTAL_SERVICE:
                 if (gentleman.getRank() == Rank.PRIVATE && gentleman.getWeeksOfService() < 2) {
                     return true;

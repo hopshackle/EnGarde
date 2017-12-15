@@ -28,7 +28,7 @@ public class JoinRegiment extends Action<Gentleman> {
         int currentRegimentId = (current == null) ? 99 : current.getID();
         int currentMonthlyStatus = (current == null) ? -1 : current.getMonthlyStatus(actor.getRank());
         for (Regiment r : Regiment.allRegiments()) {
-            if (r.getID() < currentRegimentId
+            if (!r.onCampaign() && r.getID() < currentRegimentId
                     && r.getMinSL(Rank.PRIVATE) <= actor.getSocialLevel()
                     && r.getMonthlyStatus(Rank.PRIVATE) > currentMonthlyStatus
                     && (considerCavalry || !r.isCavalry())

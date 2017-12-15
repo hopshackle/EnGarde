@@ -27,7 +27,7 @@ public class Gentleman extends Agent implements Persistent {
     protected static Name surnamer = new Name(new File(baseDir + File.separator + "FrenchSurnames.txt"));
     private static DatabaseWriter<Gentleman> agentWriter = new DatabaseWriter<>(new GentlemanDAO());
 
-    private int socialLevel, statusPoints;
+    private int socialLevel, statusPoints, militaryAbility;
     private int income;
     private Rank rank;
     private String forename, surname;
@@ -51,6 +51,7 @@ public class Gentleman extends Agent implements Persistent {
         this.locationDebug = false;
         log(getName() + " arrives in Paris [" + getUniqueID() + "]");
         setClub(Club.bestClubEligibleFor(this));
+        militaryAbility = Dice.roll(1, 6);
     }
 
     public void setSocialLevel(int newSL) {
@@ -59,6 +60,10 @@ public class Gentleman extends Agent implements Persistent {
 
     public int getSocialLevel() {
         return socialLevel;
+    }
+
+    public int getMilitaryAbility() {
+        return militaryAbility;
     }
 
     public void setIncome(int i) {
@@ -107,6 +112,7 @@ public class Gentleman extends Agent implements Persistent {
 
     public void setRegiment(Regiment newReg) {
         if (getRegiment() != null) {
+            getRegiment().memberLeaves(this);
             organisations.remove(getRegiment());
         }
         organisations.add(newReg);
@@ -155,6 +161,7 @@ public class Gentleman extends Agent implements Persistent {
         currentMention[0] += result - 1;
         log("Mentioned in Dispatches: " + result);
     }
+
     public int getMentions() {
         return mentions;
     }
@@ -177,20 +184,22 @@ public class Gentleman extends Agent implements Persistent {
         Rank rank = getRank();
         int monthlyIncome = getIncome();
         monthlyIncome += (reg != null) ? reg.getMonthlyPay(rank) : 0;
-
-        int monthlyExpenditure = getSocialLevel() * 2;
-
-        if (rank.asInteger() > 0) {
-            if (rank == Rank.CAPTAIN || (reg != null && reg.isCavalry()))
-                monthlyExpenditure += 5; // Horse + Groom
-            if (rank.asInteger() > 3)
-                monthlyExpenditure += 6; // +2 Horses
-            if (reg == null)
-                throw new AssertionError("Has rank of " + rank + " but not in regiment");
-            addStatus(reg.getMonthlyStatus(rank));
-        }
+        monthlyIncome += rank.getSalary();
+        int monthlyExpenditure = 0;
 
         if (!atFront) {
+
+            monthlyExpenditure = getSocialLevel() * 2;
+
+            if (rank.asInteger() > 0) {
+                if (rank == Rank.CAPTAIN || (reg != null && reg.isCavalry()))
+                    monthlyExpenditure += 5; // Horse + Groom
+                if (rank.asInteger() > 3)
+                    monthlyExpenditure += 6; // +2 Horses
+                if (reg != null)
+                    addStatus(reg.getMonthlyStatus(rank));
+            }
+
             if (monthlyIncome - monthlyExpenditure > getGold()) {
                 monthlyExpenditure = 0;
                 socialLevel--;
@@ -205,6 +214,7 @@ public class Gentleman extends Agent implements Persistent {
 
             addStatus(currentMention[0] + currentMention[1] + currentMention[2]);
             addStatus(mentions);
+            addStatus(rank.getStatus());
 
             log(String.format("Income: %d, Outgoings: %d, SP: %d", monthlyIncome, monthlyExpenditure, statusPoints));
 

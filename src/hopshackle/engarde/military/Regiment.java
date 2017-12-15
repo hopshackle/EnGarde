@@ -34,6 +34,8 @@ public class Regiment extends Organisation<Gentleman> {
 
     private Gentleman[] battalionCommanders = new Gentleman[3];
 
+    private boolean onCampaign;
+
     private Regiment(RegimentID regimentID, World world) {
         super(regimentID.toString(), world, new ArrayList<>());
         rid = regimentID;
@@ -126,6 +128,7 @@ public class Regiment extends Organisation<Gentleman> {
                 officer.setRank(Rank.BRIG_GENERAL);
                 colonel = null;
                 colonelID = 0;
+                officer.setRegiment(null);
                 break;
             case BRIG_GENERAL:
                 officer.log("Promoted to Lt-General");
@@ -172,7 +175,7 @@ public class Regiment extends Organisation<Gentleman> {
         int lowestFreeIndex = 2;
         for (int i = 1; i >= 0; i--)
             if (majorID[i] == 0) lowestFreeIndex = i;
-        if (lowestFreeIndex == 6)
+        if (lowestFreeIndex == 2)
             throw new AssertionError("No Free Major slots in " + this);
         majorID[lowestFreeIndex] = officer.getUniqueID();
         major[lowestFreeIndex] = officer;
@@ -204,6 +207,8 @@ public class Regiment extends Organisation<Gentleman> {
         for (int i = 0; i < 6; i++) {
             if (majorID[1] == 0 && captainID[i] != 0) {
                 if (captain[i].getSocialLevel() >= getMinSL(Rank.MAJOR) && captain[i].getGold() >= getCommissionCost(Rank.MAJOR)) {
+                    if (captain[i].getRank() != Rank.CAPTAIN)
+                        throw new AssertionError(captain[i] + " is occupying captain slot " + (i+1));
                     captain[i].log("Buys Majority");
                     captain[i].addGold(-getCommissionCost(Rank.MAJOR));
                     promote(captain[i]);
@@ -316,10 +321,11 @@ public class Regiment extends Organisation<Gentleman> {
             }
         }
         for (int i = 0; i < 6; i++) {
-            if (seniority > 2) return;
+            if (seniority > 3) return;
             if (captainID[i] != 0) {
                 if (seniority == 0) commander = captain[i];
-                if (seniority > 0) battalionCommanders[seniority-1] = captain[i];
+                if (seniority > 0 && seniority < 3) battalionCommanders[seniority-1] = captain[i];
+                if (seniority == 3) adjutant = captain[i];
                 seniority++;
             }
         }
@@ -347,4 +353,17 @@ public class Regiment extends Organisation<Gentleman> {
     public int relationshipWith(Regiment other) {
         return rid.relationShipWith(other.rid);
     }
+
+    public Gentleman getCommander() {
+        return commander;
+    }
+    public Gentleman getAdjutant() {
+        return adjutant;
+    }
+    public boolean onCampaign() { return onCampaign;}
+    public void setOnCampaign(boolean flag) { onCampaign = flag;}
+    public int deathMod() {return rid.getDeathMod();}
+    public int mentionMod() {return rid.getMentionMod();}
+    public int promotionMod() {return rid.getPromotionMod();}
+    public int plunderMod() {return rid.getPlunderMod();}
 }

@@ -13,8 +13,10 @@ public class ActionPolicy extends Policy<Action<Gentleman>> {
     public double getValue(Action<Gentleman> proposal, Agent agent) {
         if (agent instanceof Gentleman) {
             Gentleman g = (Gentleman) agent;
-            if (proposal instanceof FrontierService)
+            if (proposal instanceof MilitaryCampaign)
                 return 100.0;
+            if (proposal instanceof FrontierService)
+                return 75.0;
             if (proposal instanceof RegimentalService)
                 return 50.0;
             if (proposal instanceof HostParty) {

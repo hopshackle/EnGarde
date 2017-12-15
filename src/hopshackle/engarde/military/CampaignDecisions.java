@@ -50,7 +50,7 @@ public class CampaignDecisions {
         TimerTask monthlyCampaignResults = new TimerTask() {
             public void run() {
                 // for the moment, we just have a frontier decision each season
-                FrontierService.overallResults();
+                FrontierService.getFront().commandResults();
             }
         };
         paris.setScheduledTask(monthlyCampaignResults, 37, 40);
