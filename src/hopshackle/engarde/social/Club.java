@@ -7,7 +7,7 @@ import java.util.*;
 
 public class Club extends Organisation<Gentleman> {
 
-    static List<Club> clubs = new ArrayList<>();
+    private static List<Club> clubs = new ArrayList<>();
 
     public static List<Club> allClubs() {
         return HopshackleUtilities.cloneList(clubs);
@@ -30,10 +30,12 @@ public class Club extends Organisation<Gentleman> {
     }
 
     private ClubID clubID;
+    private EntityLog clubLog;
 
     public Club(ClubID cid, World world) {
         super(cid.fullName, world, new ArrayList<>());
         clubID = cid;
+        clubLog = new EntityLog(cid.fullName, world);
     }
 
     public boolean isEligible(Gentleman officer) {
@@ -50,6 +52,13 @@ public class Club extends Organisation<Gentleman> {
 
     public int getID() {
         return clubID.id;
+    }
+
+    public void log(String msg) {
+        clubLog.log(msg);
+    }
+    public void flushLog() {
+        clubLog.flush();
     }
 
 }

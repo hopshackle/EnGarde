@@ -1,5 +1,6 @@
 package hopshackle.engarde.actions;
 
+import hopshackle.engarde.social.SocialMeeting;
 import hopshackle.simulation.*;
 import hopshackle.engarde.*;
 import hopshackle.engarde.military.*;
@@ -34,6 +35,10 @@ public class MilitaryCampaign extends Action<Gentleman> {
         thisFront.individualResults(actor);
         for (Gentleman soldier : HopshackleUtilities.cloneList(optionalActors))
             thisFront.individualResults(soldier);
+
+        List<Gentleman> allPresent = HopshackleUtilities.convertList(thisFront.getAgents());
+        new SocialMeeting(allPresent, +2, 0);
+
         thisFront.flushLog();
     }
 
@@ -61,8 +66,14 @@ public class MilitaryCampaign extends Action<Gentleman> {
                 colonel.setAge(480 * (45));
                 colonel.setPolicy(new ActionPolicy());
             }
-            (new MilitaryCampaign(reg)).addToAllPlans();
+            MilitaryCampaign nextMonth = new MilitaryCampaign(reg);
+            nextMonth.addToAllPlans();
 
+            List<Gentleman> nonCombatants = HopshackleUtilities.cloneList(getAllConfirmedParticipants());
+            nonCombatants.removeAll(nextMonth.getAllConfirmedParticipants());
+            for (Gentleman nonC : nonCombatants) {
+                doNextDecision(nonC);
+            }
         }
     }
 }

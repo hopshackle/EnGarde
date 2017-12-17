@@ -15,12 +15,16 @@ public class WeeklySocialInteractions {
                 for (Regiment reg : Regiment.allRegiments()) {
                     List<Gentleman> allPresent = HopshackleUtilities.convertList(reg.getAgents());
                     new SocialMeeting(allPresent, -2, -2);
+                    reg.flushLog();
                 }
 
                 // iterate through each club, and have everybody there meet
                 for (Club c : Club.allClubs()) {
                     List<Gentleman> allPresent = HopshackleUtilities.convertList(c.getAgents());
-                    new SocialMeeting(allPresent, -1, -1);
+                    int modifier = (int) Math.sqrt(allPresent.size()) - 1;
+                    c.log("Total visitors: " + allPresent.size());
+                    new SocialMeeting(allPresent, -modifier, -modifier);
+                    c.flushLog();
                 }
             }
         };

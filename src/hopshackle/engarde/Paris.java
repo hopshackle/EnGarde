@@ -39,7 +39,7 @@ public class Paris extends World {
 
         populateStartingRegimentalOfficers();
 
-        new PopulationSpawner(this, 40, 5, minPopulationSize);
+        new PopulationSpawner(this, 40, 10, minPopulationSize);
         new MonthlyMaintenance(this);
         new EndWorld(this, 2 * 480 + 4);
 

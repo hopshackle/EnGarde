@@ -28,16 +28,23 @@ public class HostParty extends Action<Gentleman> {
 
     @Override
     protected void doStuff() {
+        String logMsg = "";
         switch (typeOfParty) {
             case HOST_INTIMATE_PARTY:
-                actor.log("Hosts small party at " + location.getName() + " for " + (getAllConfirmedParticipants().size() - 1) + " friends");
+                logMsg = "Hosts small party at " + location.getName() + " for " + (getAllConfirmedParticipants().size() - 1) + " friends";
                 break;
             case HOST_EXCLUSIVE_PARTY:
-                actor.log("Hosts party at " + location.getName() + " for " + (getAllConfirmedParticipants().size() - 1) + " in extended social circle");
+                logMsg = "Hosts party at " + location.getName() + " for " + (getAllConfirmedParticipants().size() - 1) + " in extended social circle";
                 break;
             case HOST_INCLUSIVE_PARTY:
-                actor.log("Hosts large party at " + location.getName() + " for " + (getAllConfirmedParticipants().size() - 1) + " acquaintances");
+                logMsg = "Hosts large party at " + location.getName() + " for " + (getAllConfirmedParticipants().size() - 1) + " acquaintances";
                 break;
+        }
+        actor.log(logMsg);
+        Club club = null;
+        if (location instanceof Club && getAllConfirmedParticipants().size() > 1) {
+            club = (Club) location;
+            club.log(actor.toString() + " " + logMsg);
         }
         actor.addGold(-actor.getSocialLevel());
         actor.addStatus(1);
@@ -47,6 +54,7 @@ public class HostParty extends Action<Gentleman> {
         for (Gentleman guest : getAllConfirmedParticipants()) {
             if (guest == actor) continue;
             guest.log("Is guest of " + actor + " at " + location);
+            if (club != null) club.log("\t" + guest.toString());
             guest.addStatus(1);
             guest.addGold(-hostSL);
             int guestClubRank = guest.getClub().getID();

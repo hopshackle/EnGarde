@@ -115,19 +115,21 @@ public class Gentleman extends Agent implements Persistent {
             getRegiment().memberLeaves(this);
             organisations.remove(getRegiment());
         }
-        organisations.add(newReg);
+        if (newReg != null) organisations.add(newReg);
     }
 
     public void setClub(Club newClub) {
         Club oldClub = getClub();
         if (oldClub == newClub) return;
         if (oldClub != null) {
-            organisations.remove(getClub());
+            organisations.remove(oldClub);
             oldClub.memberLeaves(this);
         }
-        organisations.add(newClub);
-        newClub.newMember(this);
-        log("Joins " + newClub.toString());
+        if (newClub != null) {
+            organisations.add(newClub);
+            newClub.newMember(this);
+            log("Joins " + newClub.toString());
+        }
     }
 
     public int getBirthYear() {
@@ -251,6 +253,6 @@ public class Gentleman extends Agent implements Persistent {
 
     @Override
     public String toString() {
-        return String.format("%s %s %s", getRank().toString(), getName(), getRegiment() == null ? "" : "(" + getRegiment().abbrev() + ")");
+        return String.format("%s %s %s", getRank().toString(), getName(), getRegiment() == null ? "" : "(" + getRegiment().abbrev() + ")").trim();
     }
 }
